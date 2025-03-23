@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calcolo Probabilità Dadi</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #f0f8ff;
+      padding: 20px;
+      max-width: 600px;
+      margin: auto;
+    }
+    input, button {
+      display: block;
+      width: 100%;
+      margin: 10px 0;
+      padding: 10px;
+      font-size: 1rem;
+    }
+    #risultato {
+      margin-top: 20px;
+      background: white;
+      padding: 10px;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Probabilità nel gioco dei dadi</h2>
+
+  <label>Numero totale di dadi:</label>
+  <input type="number" id="dices">
+
+  <label>Numero chiamato (da 1 a 6):</label>
+  <input type="number" id="num">
+
+  <label>Quanti ne chiami:</label>
+  <input type="number" id="times">
+
+  <label>Quanti ne hai con quel numero:</label>
+  <input type="number" id="mine">
+
+  <label>Quanti dadi hai in totale:</label>
+  <input type="number" id="mine_tot">
+
+  <button onclick="calcola()">Calcola</button>
+
+  <div id="risultato"></div>
+
+  <script>
+    function fattoriale(n) {
+      if (n === 0) return 1;
+      let res = 1;
+      for (let i = 1; i <= n; i++) res *= i;
+      return res;
+    }
+
+    function comb(n, k) {
+      if (k > n) return 0;
+      return fattoriale(n) / (fattoriale(k) * fattoriale(n - k));
+    }
+
+    function probability(n, p, t, d) {
+      let prob = 0;
+      for (let k = t; k <= d; k++) {
+        prob += comb(n, k) * Math.pow(p, k) * Math.pow(1 - p, n - k);
+      }
+      return prob;
+    }
+
+    function precise(n, p, t) {
+      return comb(n, t) * Math.pow(p, t) * Math.pow(1 - p, n - t);
+    }
+
+    function calcola() {
+      const dices = parseInt(document.getElementById("dices").value);
+      const num = parseInt(document.getElementById("num").value);
+      const times = parseInt(document.getElementById("times").value);
+      const mine = parseInt(document.getElementById("mine").value);
+      const mine_tot = parseInt(document.getElementById("mine_tot").value);
+      const diff = dices - (mine_tot - mine);
+      const p = 1 / 6;
+
+      if (dices <= 0 || num < 1 || num > 6 || times < 0 || times > dices || mine < 0 || mine > dices || mine > times) {
+        alert("Inserisci valori validi");
+        return;
+      }
+
+      const prob = probability(dices, p, times, diff) / probability(dices, p, mine, diff);
+      const approx = Math.round(prob * 10000) / 100;
+
+      const precis = precise(dices, p, times) / probability(dices, p, mine, diff);
+      const exact = Math.round(precis * 10000) / 100;
+
+      document.getElementById("risultato").innerHTML = `
+        <p>🔢 Probabilità che ci siano <strong>almeno</strong> ${times} ${num}: <strong>${approx}%</strong></p>
+        <p>🎯 Probabilità che ce ne siano <strong>esattamente</strong> ${times}: <strong>${exact}%</strong></p>
+      `;
+    }
+  </script>
+</body>
+</html>
