@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AppDesk - Generatore di Password</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #a7c1e8;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    input, button {
+      display: block;
+      width: 100%;
+      margin: 12px 0;
+      padding: 12px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+    }
+    button {
+      background-color: #3263a8;
+      color: white;
+      font-weight: bold;
+    }
+    #password {
+      font-weight: bold;
+      word-break: break-word;
+      background-color: white;
+      padding: 12px;
+      border-radius: 8px;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+  <h2>AppDesk - Genera Password</h2>
+
+  <label for="master">Master Password:</label>
+  <input type="password" id="master">
+
+  <label for="site">Nome del sito:</label>
+  <input type="text" id="site">
+
+  <label for="length">Lunghezza (default: 16):</label>
+  <input type="number" id="length" min="6" max="64" placeholder="16">
+
+  <button onclick="generaPassword()">Genera</button>
+
+  <p><strong>Password generata:</strong></p>
+  <p id="password"></p>
+
+  <script>
+    function sha256(str) {
+      const buffer = new TextEncoder().encode(str);
+      return crypto.subtle.digest("SHA-256", buffer).then(hash => {
+        return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+      });
+    }
+
+    async function generaPassword() {
+      const master = document.getElementById("master").value;
+      const site = document.getElementById("site").value;
+      const lengthInput = document.getElementById("length").value;
+      const length = lengthInput ? parseInt(lengthInput) : 16;
+
+      if (!master || !site) {
+        alert("Inserisci sia la master password che il nome del sito.");
+        return;
+      }
+
+      const combinazione = master + site;
+      const hash = await sha256(combinazione);
+      const password = hash.slice(0, length);
+
+      document.getElementById("password").textContent = password;
+    }
+  </script>
+</body>
+</html>
